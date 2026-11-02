@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-yew = { version = "*", features = ["csr"] }
+iced = { version = "0.14.0", features = ["fira-sans", "web-colors", "webgl"] }

@@ -1,0 +1,3 @@
+[tools]
+# Force Trunk to use the exact version required by your compiled binary
+wasm_bindgen = "0.2.130"
