@@ -33,3 +33,5 @@ client/dist
 server/target
 
 .env
+# Haskell server build output
+server/dist-newstyle
