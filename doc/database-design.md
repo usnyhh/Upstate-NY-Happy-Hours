@@ -23,6 +23,7 @@
 - close_time: the closing time of the location
 - happy_hour_times: the time period in which the resturant is running a happy hour
 - menu_items: point towards a set of menu items
+- owner_verified: ether null or the owner account accociated with the table
 
 ##### review item
 ID: unique id of the given review
@@ -37,3 +38,4 @@ content: the writen content of the review
 - Undiscounted: The price of the menu item before the happy hour discount
 - Discounted 
 - Deal: a misc extra deal that isnt a price decrease
+- owner_verification: null or owner

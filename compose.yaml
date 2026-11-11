@@ -1,6 +1,0 @@
-services:
-  upstatenyhappyhours:
-    image: upstatenyhappyhours
-    build:
-      context: .
-      dockerfile: ./Dockerfile
