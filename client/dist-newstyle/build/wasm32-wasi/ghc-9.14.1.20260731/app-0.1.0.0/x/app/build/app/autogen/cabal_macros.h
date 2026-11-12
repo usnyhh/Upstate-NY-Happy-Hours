@@ -91,6 +91,16 @@
   (major1) == 2 && (major2) <  1 || \
   (major1) == 2 && (major2) == 1 && (minor) <= 7)
 #endif /* MIN_TOOL_VERSION_happy */
+/* tool hpc-0.69 */
+#ifndef TOOL_VERSION_hpc
+#define TOOL_VERSION_hpc "0.69"
+#endif /* TOOL_VERSION_hpc */
+#ifndef MIN_TOOL_VERSION_hpc
+#define MIN_TOOL_VERSION_hpc(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  69 || \
+  (major1) == 0 && (major2) == 69 && (minor) <= 0)
+#endif /* MIN_TOOL_VERSION_hpc */
 /* tool hsc2hs-0.68.10 */
 #ifndef TOOL_VERSION_hsc2hs
 #define TOOL_VERSION_hsc2hs "0.68.10"
@@ -101,6 +111,26 @@
   (major1) == 0 && (major2) <  68 || \
   (major1) == 0 && (major2) == 68 && (minor) <= 10)
 #endif /* MIN_TOOL_VERSION_hsc2hs */
+/* tool pkg-config-0.29.2 */
+#ifndef TOOL_VERSION_pkg_config
+#define TOOL_VERSION_pkg_config "0.29.2"
+#endif /* TOOL_VERSION_pkg_config */
+#ifndef MIN_TOOL_VERSION_pkg_config
+#define MIN_TOOL_VERSION_pkg_config(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  29 || \
+  (major1) == 0 && (major2) == 29 && (minor) <= 2)
+#endif /* MIN_TOOL_VERSION_pkg_config */
+/* tool runghc-9.10.3 */
+#ifndef TOOL_VERSION_runghc
+#define TOOL_VERSION_runghc "9.10.3"
+#endif /* TOOL_VERSION_runghc */
+#ifndef MIN_TOOL_VERSION_runghc
+#define MIN_TOOL_VERSION_runghc(major1,major2,minor) (\
+  (major1) <  9 || \
+  (major1) == 9 && (major2) <  10 || \
+  (major1) == 9 && (major2) == 10 && (minor) <= 3)
+#endif /* MIN_TOOL_VERSION_runghc */
 
 #ifndef CURRENT_COMPONENT_ID
 #define CURRENT_COMPONENT_ID "app-0.1.0.0-inplace-app"

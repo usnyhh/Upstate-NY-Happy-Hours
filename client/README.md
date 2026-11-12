@@ -26,7 +26,7 @@ echo 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
 For interactive development in the browser via the WASM backend
 
 ```bash
-$ nix develop .#wasm --command bash -c 'make repl'
+$ nix develop ..#wasm --command bash -c 'make repl'
 ```
 
 ```
@@ -75,15 +75,15 @@ main = live defaultEvents app
 See the [Miso.Reload](https://haddocks.haskell-miso.org/miso/Miso-Reload.html) haddocks for more information.
 
 ```bash
-$ nix develop .#wasm --command bash -c 'make watch'
+$ nix develop ..#wasm --command bash -c 'make watch'
 ```
 
 ### Development
 
-Call `nix develop` to enter a shell with [GHC 9.14.1](https://haskell.org/ghc)
+Call `nix develop ..#wasm` (from `client/`) to enter a shell with [GHC 9.14.1](https://haskell.org/ghc)
 
 ```bash
-$ nix develop .#wasm
+$ nix develop ..#wasm
 ```
 
 Once in the shell, you can call `cabal run` to start the development server and view the application at http://localhost:8080
@@ -91,19 +91,19 @@ Once in the shell, you can call `cabal run` to start the development server and 
 ### Build (Web Assembly)
 
 ```bash
-$ nix develop .#wasm --command bash -c "make"
+$ nix develop ..#wasm --command bash -c "make"
 ```
 
 ### Build (JavaScript)
 
 ```bash
-$ nix develop .#ghcjs --command bash -c "make js"
+$ nix develop ..#ghcjs --command bash -c "make js"
 ```
 
 ### Build (MicroHs)
 
 ```bash
-$ nix develop .#mhs --command bash -c "make mhs"
+$ nix develop ..#mhs --command bash -c "make mhs"
 ```
 
 ### The miso tool (MicroHs, without nix)
@@ -121,13 +121,13 @@ $ miso build    # public/
 To host the built application you can call `serve`
 
 ```bash
-$ nix develop .#wasm --command bash -c "make serve"
+$ nix develop ..#wasm --command bash -c "make serve"
 ```
 
 ### Clean
 
 ```bash
-$ nix develop --command bash -c "make clean"
+$ nix develop ..#client --command bash -c "make clean"
 ```
 
 ### CI

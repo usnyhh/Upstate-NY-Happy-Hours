@@ -46,12 +46,12 @@ getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: 
 
 
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
-bindir     = "/home/nixos/.ghc-wasm/.cabal/bin"
-libdir     = "/home/nixos/.ghc-wasm/.cabal/lib/wasm32-wasi-ghc-9.14.1.20260731-a678/app-0.1.0.0-inplace-app"
-dynlibdir  = "/home/nixos/.ghc-wasm/.cabal/lib/wasm32-wasi-ghc-9.14.1.20260731-a678"
-datadir    = "/home/nixos/.ghc-wasm/.cabal/share/wasm32-wasi-ghc-9.14.1.20260731-a678/app-0.1.0.0"
-libexecdir = "/home/nixos/.ghc-wasm/.cabal/libexec/wasm32-wasi-ghc-9.14.1.20260731-a678/app-0.1.0.0"
-sysconfdir = "/home/nixos/.ghc-wasm/.cabal/etc"
+bindir     = "/home/may/.ghc-wasm/.cabal/bin"
+libdir     = "/home/may/.ghc-wasm/.cabal/lib/wasm32-wasi-ghc-9.14.1.20260731-a678/app-0.1.0.0-inplace-app"
+dynlibdir  = "/home/may/.ghc-wasm/.cabal/lib/wasm32-wasi-ghc-9.14.1.20260731-a678"
+datadir    = "/home/may/.ghc-wasm/.cabal/share/wasm32-wasi-ghc-9.14.1.20260731-a678/app-0.1.0.0"
+libexecdir = "/home/may/.ghc-wasm/.cabal/libexec/wasm32-wasi-ghc-9.14.1.20260731-a678/app-0.1.0.0"
+sysconfdir = "/home/may/.ghc-wasm/.cabal/etc"
 
 getBinDir     = catchIO (getEnv "app_bindir")     (\_ -> return bindir)
 getLibDir     = catchIO (getEnv "app_libdir")     (\_ -> return libdir)
