@@ -1,0 +1,13 @@
+[package]
+name = "server"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = "0.8"
+sea-orm = { version = "2.0", features = ["sqlx-sqlite", "runtime-tokio-rustls", "macros"] }
+serde = { version = "1", features = ["derive"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "net"] }
+tower-http = { version = "0.7", features = ["cors", "trace"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
