@@ -1,55 +1,46 @@
+mod api;
 mod app;
+mod city;
+mod components;
+mod geolocate;
+mod http;
 
-/// Native desktop entry point (`cargo run`).
-#[cfg(not(target_arch = "wasm32"))]
-fn main() -> eframe::Result {
-    const APP_NAME: &str = "Upstate NY Happy Hours";
+const APP_NAME: &str = "Upstate NY Happy Hours";
 
-    // Logs go to stderr; control verbosity with RUST_LOG (default: info).
-    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
+fn main() -> iced::Result {
+    init_logging();
 
-    let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default()
-            .with_title(APP_NAME)
-            .with_app_id("upstate-ny-happy-hours")
-            .with_inner_size([900.0, 650.0])
-            .with_min_inner_size([360.0, 300.0]),
-        ..Default::default()
-    };
-
-    eframe::run_native(
-        APP_NAME,
-        options,
-        Box::new(|cc| Ok(Box::new(app::App::new(cc)))),
-    )
+    iced::application(app::App::new, app::App::update, app::App::view)
+        .title(APP_NAME)
+        .theme(iced::Theme::Dark)
+        .window(window_settings())
+        .run()
 }
 
-/// Web entry point (`trunk serve`): mounts onto `<canvas id="app_canvas">`.
+/// Native: logs go to stderr; control verbosity with RUST_LOG (default: info).
+#[cfg(not(target_arch = "wasm32"))]
+fn init_logging() {
+    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
+}
+
+/// Web: route `log` output and panics to the browser console.
 #[cfg(target_arch = "wasm32")]
-fn main() {
-    use wasm_bindgen::JsCast as _;
+fn init_logging() {
+    console_error_panic_hook::set_once();
+    console_log::init_with_level(log::Level::Debug).ok();
+}
 
-    // Route `log` output to the browser console.
-    eframe::WebLogger::init(log::LevelFilter::Debug).ok();
-
-    let canvas = web_sys::window()
-        .and_then(|w| w.document())
-        .and_then(|d| d.get_element_by_id("app_canvas"))
-        .expect("index.html must contain <canvas id=\"app_canvas\">")
-        .dyn_into::<web_sys::HtmlCanvasElement>()
-        .expect("#app_canvas is not a <canvas>");
-
-    wasm_bindgen_futures::spawn_local(async move {
-        let result = eframe::WebRunner::new()
-            .start(
-                canvas,
-                eframe::WebOptions::default(),
-                Box::new(|cc| Ok(Box::new(app::App::new(cc)))),
-            )
-            .await;
-
-        if let Err(e) = result {
-            log::error!("failed to start eframe: {e:?}");
-        }
-    });
+fn window_settings() -> iced::window::Settings {
+    iced::window::Settings {
+        size: iced::Size::new(900.0, 650.0),
+        min_size: Some(iced::Size::new(360.0, 300.0)),
+        // On the web, iced replaces `<div id="iced">` in index.html (the default
+        // target), so nothing platform-specific is needed there.
+        #[cfg(target_os = "linux")]
+        platform_specific: iced::window::settings::PlatformSpecific {
+            application_id: "upstate-ny-happy-hours".into(),
+            ..Default::default()
+        },
+        ..Default::default()
+    }
 }

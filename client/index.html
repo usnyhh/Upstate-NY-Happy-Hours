@@ -7,10 +7,11 @@
     <link data-trunk rel="rust" data-wasm-opt="2" />
     <style>
       html, body { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background: #1b1b1b; }
-      #app_canvas { display: block; width: 100%; height: 100%; }
+      canvas { display: block; width: 100%; height: 100%; }
     </style>
   </head>
   <body>
-    <canvas id="app_canvas"></canvas>
+    <!-- iced replaces this element with its canvas. -->
+    <div id="iced"></div>
   </body>
 </html>

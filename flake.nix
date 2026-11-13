@@ -1,5 +1,5 @@
 {
-  description = "Upstate NY Happy Hours: egui client (web + desktop) + axum server";
+  description = "Upstate NY Happy Hours: iced client (web + desktop) + axum server";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -36,7 +36,7 @@
           buildInputs = [ pkgs.sqlite ];
         };
 
-        # ---- client: egui app built to wasm with trunk ----------------------
+        # ---- client: iced app built to wasm with trunk ----------------------
         rustToolchain = pkgs.rust-bin.stable.latest.default.override {
           extensions = [ "rust-src" "rust-analyzer" ];
           targets = [ "wasm32-unknown-unknown" ];
@@ -81,9 +81,11 @@
         };
 
         # ---- client: native desktop build -----------------------------------
-        # winit/glutin dlopen these at runtime rather than linking them, so the
-        # binary has to be told where they live.
+        # winit and wgpu dlopen these at runtime rather than linking them, so the
+        # binary has to be told where they live. wgpu prefers Vulkan and falls
+        # back to GL; iced falls back to its tiny-skia software renderer.
         desktopRuntimeLibs = with pkgs; [
+          vulkan-loader
           libGL
           libxkbcommon
           wayland
@@ -108,6 +110,12 @@
           };
           cargoLock.lockFile = ./client/Cargo.lock;
           nativeBuildInputs = [ pkgs.makeWrapper ];
+          # reqwest's rustls backend (for the HTTPS IP-geolocation lookup) uses
+          # aws-lc-sys. nixpkgs sets AWS_LC_SYS_USE_SYSTEM=1, but its aws-lc isn't
+          # one aws-lc-sys accepts, so build the vendored copy as `cargo run` does.
+          preBuild = ''
+            unset AWS_LC_SYS_USE_SYSTEM
+          '';
           postInstall = ''
             mv $out/bin/client $out/bin/client-desktop
             wrapProgram $out/bin/client-desktop \

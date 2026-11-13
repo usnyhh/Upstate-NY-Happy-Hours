@@ -2,7 +2,7 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 /// A bar/restaurant. Serialized in camelCase to match the client's
-/// `Location` struct (`client/src/app.rs`): `locationId`, `name`, `address`.
+/// `Location` struct (`client/src/api.rs`): `locationId`, `name`, `address`.
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "locations")]
 #[serde(rename_all = "camelCase")]

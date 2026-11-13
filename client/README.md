@@ -1,9 +1,10 @@
 # client
 
-egui frontend. The same `src/app.rs` builds for two targets:
+[iced](https://iced.rs) frontend. The same code builds for two targets:
 
 - **web**: compiled to WebAssembly with [trunk](https://trunkrs.dev)
-- **desktop**: a native window (X11 or Wayland on Linux)
+- **desktop**: a native window (X11 or Wayland on Linux; wgpu via Vulkan/GL,
+  with a software fallback)
 
 ```sh
 nix develop ..#client   # rust (with wasm32 target), trunk, binaryen, desktop GL/windowing libs
@@ -28,4 +29,9 @@ Or from anywhere in the repo:
 | `nix run .#run-desktop`  | server + desktop client               |
 
 The app talks to the server at `http://127.0.0.1:3000/api` (`API_BASE` in
-`src/app.rs`); start it with `nix run .#server`.
+`src/api.rs`); start it with `nix run .#server`.
+
+On launch the client looks up the user's approximate location from their public
+IP (`https://ipinfo.io/json`, see `src/geolocate.rs`) and preselects the nearest
+city, if one is within 150 km. Nothing is selected if the lookup fails, and a city
+the user has already picked is never overridden.
