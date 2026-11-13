@@ -1,5 +1,5 @@
 {
-  description = "Upstate NY Happy Hours: egui (wasm) client + axum server";
+  description = "Upstate NY Happy Hours: egui client (web + desktop) + axum server";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -80,6 +80,41 @@
           '';
         };
 
+        # ---- client: native desktop build -----------------------------------
+        # winit/glutin dlopen these at runtime rather than linking them, so the
+        # binary has to be told where they live.
+        desktopRuntimeLibs = with pkgs; [
+          libGL
+          libxkbcommon
+          wayland
+          libx11
+          libxcursor
+          libxi
+          libxrandr
+        ];
+
+        # Unlike the wasm build this needs no network (cargoLock vendors the
+        # crates), so it is a normal sandboxed package.
+        client-desktop = pkgs.rustPlatform.buildRustPackage {
+          pname = "client-desktop";
+          version = "0.1.0";
+          src = lib.fileset.toSource {
+            root = ./client;
+            fileset = lib.fileset.unions [
+              ./client/src
+              ./client/Cargo.toml
+              ./client/Cargo.lock
+            ];
+          };
+          cargoLock.lockFile = ./client/Cargo.lock;
+          nativeBuildInputs = [ pkgs.makeWrapper ];
+          postInstall = ''
+            mv $out/bin/client $out/bin/client-desktop
+            wrapProgram $out/bin/client-desktop \
+              --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath desktopRuntimeLibs}
+          '';
+        };
+
         # ---- both together --------------------------------------------------
         run-all = pkgs.writeShellApplication {
           name = "run-all";
@@ -92,6 +127,17 @@
           '';
         };
 
+        run-desktop = pkgs.writeShellApplication {
+          name = "run-desktop";
+          runtimeInputs = [ server client-desktop ];
+          text = ''
+            server &
+            server_pid=$!
+            trap 'kill "$server_pid" 2>/dev/null || true' EXIT INT TERM
+            client-desktop
+          '';
+        };
+
         mkApp = drv: name: {
           type = "app";
           program = "${drv}/bin/${name}";
@@ -101,14 +147,16 @@
           packages = [ rustToolchain pkgs.sqlite ];
         };
 
+        # Covers both targets: `trunk serve` for web, `cargo run` for desktop.
         clientShell = pkgs.mkShell {
           packages = clientTools;
+          LD_LIBRARY_PATH = lib.makeLibraryPath desktopRuntimeLibs;
         };
       in
       {
         packages = {
           default = server;
-          inherit server client-build client-serve run-all;
+          inherit server client-build client-serve client-desktop run-all run-desktop;
         };
 
         apps = {
@@ -116,6 +164,8 @@
           server = mkApp server "server";
           client = mkApp client-serve "client-serve";
           client-build = mkApp client-build "client-build";
+          desktop = mkApp client-desktop "client-desktop";
+          run-desktop = mkApp run-desktop "run-desktop";
         };
 
         devShells = {

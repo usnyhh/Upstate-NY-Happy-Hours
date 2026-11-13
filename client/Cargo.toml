@@ -1,0 +1,33 @@
+[package]
+name = "client"
+version = "0.1.0"
+edition = "2024"
+
+# Builds for two targets from the same `app.rs`:
+#   * web     — `trunk serve` / `trunk build` (wasm32-unknown-unknown)
+#   * desktop — `cargo run` (native, X11 + Wayland on Linux)
+
+[dependencies]
+eframe = { version = "0.37", default-features = false, features = ["default_fonts", "glow"] }
+egui = "0.37"
+ehttp = { version = "0.7", features = ["json"] }
+serde = { version = "1", features = ["derive"] }
+log = "0.4"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+web-sys = { version = "0.3", features = ["Document", "Window", "HtmlCanvasElement"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+# Cargo unions these features with the base `eframe` entry above.
+eframe = { version = "0.37", default-features = false, features = ["default_fonts", "glow", "wayland", "x11", "clipboard"] }
+# eframe turns off winit's default features; re-enable them so libwayland is
+# dlopen'd at runtime (no build-time link) and windows get client-side
+# decorations on compositors that don't draw their own (e.g. GNOME).
+winit = "0.30.13"
+env_logger = "0.11"
+
+[profile.release]
+opt-level = 2
+lto = true
