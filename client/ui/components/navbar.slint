@@ -1,0 +1,52 @@
+import { Button, ComboBox, Palette } from "std-widgets.slint";
+import { BorderedBox } from "bordered-box.slint";
+
+/// A top bar with a city picker on the left and a Refresh button on the right.
+export component Navbar inherits BorderedBox {
+    in property <[string]> cities;
+    in property <string> placeholder;
+    /// Index into `cities`, or -1 while nothing is selected.
+    ///
+    /// ComboBox resets this to 0 whenever its model changes, so only create a
+    /// Navbar once `cities` has its final value.
+    in-out property <int> selected: -1;
+    callback refresh();
+
+    HorizontalLayout {
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        alignment: space-between;
+
+        Rectangle {
+            min-width: 180px;
+
+            // Fill the wrapper so the placeholder below lines up with it.
+            ComboBox {
+                width: 100%;
+                height: 100%;
+                model: root.cities;
+                current-index <=> root.selected;
+            }
+
+            // ComboBox has no placeholder; with nothing selected its text is
+            // empty, so draw one over it. Text doesn't take input, so clicks
+            // still reach the ComboBox.
+            if root.selected < 0: HorizontalLayout {
+                // Matches the fluent ComboBox's own text inset.
+                padding-left: 11px;
+                Text {
+                    text: root.placeholder;
+                    color: Palette.foreground.with-alpha(0.6);
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        Button {
+            text: "Refresh";
+            clicked => { root.refresh(); }
+        }
+    }
+}

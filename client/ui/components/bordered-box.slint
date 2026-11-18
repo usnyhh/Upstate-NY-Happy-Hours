@@ -1,0 +1,9 @@
+import { Palette } from "std-widgets.slint";
+
+/// A box with the style's border, used for the navbar and the location cards.
+export component BorderedBox inherits Rectangle {
+    background: Palette.alternate-background;
+    border-width: 1px;
+    border-color: Palette.border;
+    border-radius: 4px;
+}

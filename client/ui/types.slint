@@ -1,0 +1,10 @@
+// Data passed between Rust (src/app.rs) and the UI.
+
+/// One location as the UI shows it; built from `api::Location` in src/app.rs.
+export struct LocationItem {
+    name: string,
+    address: string,
+}
+
+/// State of the locations request.
+export enum FetchState { loading, done, failed }

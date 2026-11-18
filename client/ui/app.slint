@@ -1,85 +1,15 @@
-// The whole UI. Rust (src/app.rs) owns the data and the network requests; this
-// file only lays it out and reports user input back through `selected-city`
-// and the `refresh` callback.
+// The app window. Rust (src/app.rs) owns the data and the network requests;
+// the UI only lays it out and reports user input back through `selected-city`
+// and the `refresh` callback. The pieces live in components/, and the types
+// shared with Rust in types.slint.
 
-import { Button, ComboBox, ListView, Palette } from "std-widgets.slint";
+import { Palette } from "std-widgets.slint";
+import { LocationItem, FetchState } from "types.slint";
+import { Navbar } from "components/navbar.slint";
+import { LocationList } from "components/location-list.slint";
 
-export struct LocationItem {
-    name: string,
-    address: string,
-}
-
-export enum FetchState { loading, done, failed }
-
-/// A box with the style's border, used for the navbar and the location cards.
-component BorderedBox inherits Rectangle {
-    background: Palette.alternate-background;
-    border-width: 1px;
-    border-color: Palette.border;
-    border-radius: 4px;
-}
-
-/// A top bar with a city picker on the left and a Refresh button on the right.
-component Navbar inherits BorderedBox {
-    in property <[string]> cities;
-    in property <string> placeholder;
-    /// Index into `cities`, or -1 while nothing is selected.
-    ///
-    /// ComboBox resets this to 0 whenever its model changes, so only create a
-    /// Navbar once `cities` has its final value.
-    in-out property <int> selected: -1;
-    callback refresh();
-
-    HorizontalLayout {
-        padding-left: 12px;
-        padding-right: 12px;
-        padding-top: 8px;
-        padding-bottom: 8px;
-        alignment: space-between;
-
-        Rectangle {
-            min-width: 180px;
-
-            // Fill the wrapper so the placeholder below lines up with it.
-            ComboBox {
-                width: 100%;
-                height: 100%;
-                model: root.cities;
-                current-index <=> root.selected;
-            }
-
-            // ComboBox has no placeholder; with nothing selected its text is
-            // empty, so draw one over it. Text doesn't take input, so clicks
-            // still reach the ComboBox.
-            if root.selected < 0: HorizontalLayout {
-                // Matches the fluent ComboBox's own text inset.
-                padding-left: 11px;
-                Text {
-                    text: root.placeholder;
-                    color: Palette.foreground.with-alpha(0.6);
-                    vertical-alignment: center;
-                }
-            }
-        }
-
-        Button {
-            text: "Refresh";
-            clicked => { root.refresh(); }
-        }
-    }
-}
-
-/// One card showing a location's name (bold) and address.
-component LocationCard inherits BorderedBox {
-    in property <LocationItem> location;
-
-    VerticalLayout {
-        padding: 10px;
-        spacing: 4px;
-        Text { text: root.location.name; font-weight: 700; wrap: word-wrap; }
-        Text { text: root.location.address; wrap: word-wrap; }
-    }
-}
+// Re-exported so the generated Rust code includes them.
+export { LocationItem, FetchState }
 
 export component AppWindow inherits Window {
     in property <[string]> cities;
@@ -121,14 +51,8 @@ export component AppWindow inherits Window {
             if root.locations-state == FetchState.done && root.locations.length == 0: Text {
                 text: "No locations yet.";
             }
-            if root.locations-state == FetchState.done && root.locations.length > 0: ListView {
-                vertical-stretch: 1;
-                for location in root.locations: VerticalLayout {
-                    // Space between cards, and keep them clear of the scrollbar.
-                    padding-bottom: 8px;
-                    padding-right: 12px;
-                    LocationCard { location: location; }
-                }
+            if root.locations-state == FetchState.done && root.locations.length > 0: LocationList {
+                locations: root.locations;
             }
 
             // Keep the text at the top when there is no list to fill the space.

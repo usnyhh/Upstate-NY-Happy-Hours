@@ -1,0 +1,17 @@
+import { ListView } from "std-widgets.slint";
+import { LocationItem } from "../types.slint";
+import { LocationCard } from "location-card.slint";
+
+/// A scrolling list of location cards that fills the available height.
+export component LocationList inherits ListView {
+    in property <[LocationItem]> locations;
+
+    vertical-stretch: 1;
+
+    for location in root.locations: VerticalLayout {
+        // Space between cards, and keep them clear of the scrollbar.
+        padding-bottom: 8px;
+        padding-right: 12px;
+        LocationCard { location: location; }
+    }
+}

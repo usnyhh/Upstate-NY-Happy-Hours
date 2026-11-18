@@ -1,0 +1,14 @@
+import { LocationItem } from "../types.slint";
+import { BorderedBox } from "bordered-box.slint";
+
+/// One card showing a location's name (bold) and address.
+export component LocationCard inherits BorderedBox {
+    in property <LocationItem> location;
+
+    VerticalLayout {
+        padding: 10px;
+        spacing: 4px;
+        Text { text: root.location.name; font-weight: 700; wrap: word-wrap; }
+        Text { text: root.location.address; wrap: word-wrap; }
+    }
+}
