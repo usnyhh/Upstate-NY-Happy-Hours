@@ -3,13 +3,22 @@ name = "client"
 version = "0.1.0"
 edition = "2024"
 
-# Builds for two targets from the same `app.rs`:
+# Builds for two targets from the same code (`ui/app.slint` + `src/`):
 #   * web     — `trunk serve` / `trunk build` (wasm32-unknown-unknown)
 #   * desktop — `cargo run` (native, X11 + Wayland on Linux)
 
 [dependencies]
-# Default features: wgpu + tiny-skia (software fallback) renderers, X11 + Wayland.
-iced = "0.14"
+# winit backend (X11 + Wayland on Linux, a <canvas> on the web), rendered with
+# femtovg (OpenGL / WebGL), with the software renderer as a fallback. Slint's
+# default `system-tray` feature is left out; nothing here uses it.
+slint = { version = "1.19", default-features = false, features = [
+    "std",
+    "compat-1-2",
+    "backend-winit",
+    "renderer-femtovg",
+    "renderer-software",
+    "accessibility",
+] }
 # The API is plain HTTP on localhost. TLS is only needed for the HTTPS
 # IP-geolocation lookup (src/geolocate.rs): `rustls` is enabled for native below;
 # on wasm the browser's fetch handles TLS.
@@ -17,16 +26,18 @@ reqwest = { version = "0.13", default-features = false, features = ["json"] }
 serde = { version = "1", features = ["derive"] }
 log = "0.4"
 
+[build-dependencies]
+slint-build = "1.19"
+
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-# Render through WebGL so the app also works in browsers without WebGPU.
-iced = { version = "0.14", features = ["webgl"] }
 console_log = "1"
 console_error_panic_hook = "0.1"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-# reqwest needs a tokio runtime on native; this makes iced's executor tokio.
-iced = { version = "0.14", features = ["tokio"] }
 reqwest = { version = "0.13", default-features = false, features = ["json", "rustls"] }
+# reqwest needs a tokio runtime on native, but futures run on Slint's event
+# loop; async-compat runs them inside a (lazily started) tokio context.
+async-compat = "0.2"
 env_logger = "0.11"
 
 [profile.release]

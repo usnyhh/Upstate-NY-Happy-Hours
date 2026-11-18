@@ -1,0 +1,140 @@
+// The whole UI. Rust (src/app.rs) owns the data and the network requests; this
+// file only lays it out and reports user input back through `selected-city`
+// and the `refresh` callback.
+
+import { Button, ComboBox, ListView, Palette } from "std-widgets.slint";
+
+export struct LocationItem {
+    name: string,
+    address: string,
+}
+
+export enum FetchState { loading, done, failed }
+
+/// A box with the style's border, used for the navbar and the location cards.
+component BorderedBox inherits Rectangle {
+    background: Palette.alternate-background;
+    border-width: 1px;
+    border-color: Palette.border;
+    border-radius: 4px;
+}
+
+/// A top bar with a city picker on the left and a Refresh button on the right.
+component Navbar inherits BorderedBox {
+    in property <[string]> cities;
+    in property <string> placeholder;
+    /// Index into `cities`, or -1 while nothing is selected.
+    ///
+    /// ComboBox resets this to 0 whenever its model changes, so only create a
+    /// Navbar once `cities` has its final value.
+    in-out property <int> selected: -1;
+    callback refresh();
+
+    HorizontalLayout {
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        alignment: space-between;
+
+        Rectangle {
+            min-width: 180px;
+
+            // Fill the wrapper so the placeholder below lines up with it.
+            ComboBox {
+                width: 100%;
+                height: 100%;
+                model: root.cities;
+                current-index <=> root.selected;
+            }
+
+            // ComboBox has no placeholder; with nothing selected its text is
+            // empty, so draw one over it. Text doesn't take input, so clicks
+            // still reach the ComboBox.
+            if root.selected < 0: HorizontalLayout {
+                // Matches the fluent ComboBox's own text inset.
+                padding-left: 11px;
+                Text {
+                    text: root.placeholder;
+                    color: Palette.foreground.with-alpha(0.6);
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        Button {
+            text: "Refresh";
+            clicked => { root.refresh(); }
+        }
+    }
+}
+
+/// One card showing a location's name (bold) and address.
+component LocationCard inherits BorderedBox {
+    in property <LocationItem> location;
+
+    VerticalLayout {
+        padding: 10px;
+        spacing: 4px;
+        Text { text: root.location.name; font-weight: 700; wrap: word-wrap; }
+        Text { text: root.location.address; wrap: word-wrap; }
+    }
+}
+
+export component AppWindow inherits Window {
+    in property <[string]> cities;
+    /// Index into `cities`, or -1 while nothing is selected.
+    in-out property <int> selected-city: -1;
+    in property <FetchState> locations-state: FetchState.loading;
+    in property <string> locations-error;
+    in property <[LocationItem]> locations;
+    callback refresh();
+
+    title: "Upstate NY Happy Hours";
+    preferred-width: 900px;
+    preferred-height: 650px;
+    min-width: 360px;
+    min-height: 300px;
+    background: Palette.background;
+
+    VerticalLayout {
+        // See `Navbar.selected`: wait until Rust has filled in `cities`.
+        if root.cities.length > 0: Navbar {
+            cities: root.cities;
+            placeholder: "Choose a city";
+            selected <=> root.selected-city;
+            refresh => { root.refresh(); }
+        }
+
+        VerticalLayout {
+            padding: 12px;
+            spacing: 10px;
+
+            Text { text: "Locations"; font-size: 20px; }
+
+            if root.locations-state == FetchState.loading: Text { text: "Loading locations…"; }
+            if root.locations-state == FetchState.failed: Text {
+                text: root.locations-error;
+                color: #ff6b6b;
+                wrap: word-wrap;
+            }
+            if root.locations-state == FetchState.done && root.locations.length == 0: Text {
+                text: "No locations yet.";
+            }
+            if root.locations-state == FetchState.done && root.locations.length > 0: ListView {
+                vertical-stretch: 1;
+                for location in root.locations: VerticalLayout {
+                    // Space between cards, and keep them clear of the scrollbar.
+                    padding-bottom: 8px;
+                    padding-right: 12px;
+                    LocationCard { location: location; }
+                }
+            }
+
+            // Keep the text at the top when there is no list to fill the space.
+            if root.locations-state != FetchState.done || root.locations.length == 0: Rectangle {
+                vertical-stretch: 1;
+            }
+        }
+    }
+}

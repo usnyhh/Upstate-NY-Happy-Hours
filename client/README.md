@@ -1,9 +1,12 @@
 # client
 
-[iced](https://iced.rs) frontend. The same code builds for two targets:
+[Slint](https://slint.dev) frontend. The UI is declared in `ui/app.slint`
+(compiled to Rust by `build.rs`); `src/app.rs` fills in its data and runs the
+network requests. The same code builds for two targets:
 
-- **web**: compiled to WebAssembly with [trunk](https://trunkrs.dev)
-- **desktop**: a native window (X11 or Wayland on Linux; wgpu via Vulkan/GL,
+- **web**: compiled to WebAssembly with [trunk](https://trunkrs.dev), drawn into
+  a `<canvas>` with WebGL
+- **desktop**: a native window (X11 or Wayland on Linux; OpenGL via femtovg,
   with a software fallback)
 
 ```sh

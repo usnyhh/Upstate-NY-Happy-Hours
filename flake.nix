@@ -1,5 +1,5 @@
 {
-  description = "Upstate NY Happy Hours: iced client (web + desktop) + axum server";
+  description = "Upstate NY Happy Hours: Slint client (web + desktop) + axum server";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -36,7 +36,7 @@
           buildInputs = [ pkgs.sqlite ];
         };
 
-        # ---- client: iced app built to wasm with trunk ----------------------
+        # ---- client: Slint app built to wasm with trunk ----------------------
         rustToolchain = pkgs.rust-bin.stable.latest.default.override {
           extensions = [ "rust-src" "rust-analyzer" ];
           targets = [ "wasm32-unknown-unknown" ];
@@ -48,7 +48,10 @@
         trunk = pkgs.trunk.overrideAttrs (old: {
           buildInputs = (old.buildInputs or [ ]) ++ [ pkgs.zstd ];
         });
-        clientTools = [ rustToolchain trunk pkgs.binaryen ];
+        # Even for the wasm target, build scripts and proc macros are compiled
+        # for the host, and rustc links them with the system `cc`. mkShell
+        # brings one along, but writeShellApplication doesn't.
+        clientTools = [ rustToolchain trunk pkgs.binaryen pkgs.stdenv.cc ];
 
         # trunk needs network access (crates.io), so the client is built in
         # the working tree rather than in the Nix sandbox.
@@ -81,12 +84,13 @@
         };
 
         # ---- client: native desktop build -----------------------------------
-        # winit and wgpu dlopen these at runtime rather than linking them, so the
-        # binary has to be told where they live. wgpu prefers Vulkan and falls
-        # back to GL; iced falls back to its tiny-skia software renderer.
+        # winit, glutin (OpenGL for Slint's femtovg renderer) and Slint's font
+        # lookup dlopen these at runtime rather than linking them, so the binary
+        # has to be told where they live. Without GL, Slint falls back to its
+        # software renderer.
         desktopRuntimeLibs = with pkgs; [
-          vulkan-loader
           libGL
+          fontconfig
           libxkbcommon
           wayland
           libx11
@@ -104,6 +108,8 @@
             root = ./client;
             fileset = lib.fileset.unions [
               ./client/src
+              ./client/ui
+              ./client/build.rs
               ./client/Cargo.toml
               ./client/Cargo.lock
             ];
